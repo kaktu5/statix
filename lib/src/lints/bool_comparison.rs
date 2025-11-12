@@ -84,7 +84,7 @@ impl Rule for BoolComparison {
         let at = node.text_range();
         Some(self.report().suggest(
             at,
-            format!("Comparing `{non_bool_side}` with boolean literal `{bool_side}`"),
+            format!("Comparing '{non_bool_side}' with boolean literal '{bool_side}'. We can't check the type of '{non_bool_side}'. Please verify that holds a boolean expression."),
             Suggestion::with_replacement(at, replacement),
         ))
     }
