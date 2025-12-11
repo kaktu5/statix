@@ -3,7 +3,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use ignore::{overrides::OverrideBuilder, WalkBuilder};
+use ignore::{WalkBuilder, overrides::OverrideBuilder};
 
 /// Walks through target paths and returns an iterator of .nix files, respecting gitignore rules.
 ///
@@ -12,7 +12,7 @@ use ignore::{overrides::OverrideBuilder, WalkBuilder};
 /// * `targets` - File or directory paths to walk through
 /// * `unrestricted` - If true, don't respect .gitignore files; if false, respect them
 pub fn walk_nix_files<P: AsRef<Path>>(
-    ignore_patterns: Vec<String>,
+    ignore_patterns: &[String],
     targets: &[P],
     unrestricted: bool,
 ) -> Result<impl Iterator<Item = PathBuf>, io::Error> {
@@ -34,13 +34,13 @@ pub fn walk_nix_files<P: AsRef<Path>>(
     if !ignore_patterns.is_empty() {
         let mut override_builder = OverrideBuilder::new("");
 
-        for pattern in &ignore_patterns {
+        for pattern in ignore_patterns {
             // Note: The `!` prefix has inverted semantics in OverrideBuilder compared to gitignore.
             // In OverrideBuilder: `!pattern` means "ignore files matching pattern"
             // In gitignore: `!pattern` means "don't ignore files matching pattern" (whitelist)
             // So we add `!` to make ignore_patterns actually ignore files.
             override_builder
-                .add(&format!("!{}", pattern))
+                .add(&format!("!{pattern}"))
                 .map_err(|e| io::Error::new(io::ErrorKind::InvalidInput, e))?;
         }
 
@@ -57,7 +57,7 @@ pub fn walk_nix_files<P: AsRef<Path>>(
         .filter_map(|result| match result {
             Ok(entry) => Some(entry),
             Err(err) => {
-                eprintln!("Warning: Error reading directory entry: {}", err);
+                eprintln!("Warning: Error reading directory entry: {err}");
                 None
             }
         })

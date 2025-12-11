@@ -5,7 +5,7 @@ use std::{
     str::FromStr,
 };
 
-use crate::{dirs, err::ConfigErr, utils, LintMap};
+use crate::{LintMap, dirs, err::ConfigErr, utils};
 
 use clap::Parser;
 use lib::LINTS;
@@ -77,7 +77,7 @@ impl Check {
             Ok(ReadOnlyVfs::singleton("<stdin>", src.as_bytes()))
         } else {
             let all_ignores = [self.ignore.as_slice(), extra_ignores].concat();
-            let files = dirs::walk_nix_files(all_ignores, &self.target, self.unrestricted)?;
+            let files = dirs::walk_nix_files(&all_ignores, &self.target, self.unrestricted)?;
             Ok(vfs(&files.collect::<Vec<_>>()))
         }
     }
@@ -129,7 +129,7 @@ impl Fix {
             Ok(ReadOnlyVfs::singleton("<stdin>", src.as_bytes()))
         } else {
             let all_ignores = [self.ignore.as_slice(), extra_ignores].concat();
-            let files = dirs::walk_nix_files(all_ignores, &self.target, self.unrestricted)?;
+            let files = dirs::walk_nix_files(&all_ignores, &self.target, self.unrestricted)?;
             Ok(vfs(&files.collect::<Vec<_>>()))
         }
     }
